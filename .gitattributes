@@ -1,0 +1,4 @@
+# Shell scripts run under Linux bash in CI and at launch. A CR from a Windows
+# checkout makes `set -o pipefail` fail as `pipefail\r`.
+*.sh text eol=lf
+*.bash text eol=lf
