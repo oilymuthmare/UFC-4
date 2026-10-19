@@ -127,9 +127,12 @@ class GamePatchTests(unittest.TestCase):
 
     def test_ini_keys_select_patches(self):
         found = external_patches(ROOT / 'patches')
-        self.assertEqual(external_selection(found, None, {}), [])
+        self.assertEqual([key for key, _, _ in external_selection(found, None, {})],
+                         ['UFC4.xml/DirtyHttpCM scnm null getter'])
         selected = external_selection(found, None, {'patch_60fps': '1', 'patch_no_motion_blur': '0'})
-        self.assertEqual([key for key, _, _ in selected], [GAME_PATCH_KEYS[k] for k in ('patch_60fps',) if k in GAME_PATCH_KEYS])
+        self.assertEqual([key for key, _, _ in selected],
+                         ['UFC4.xml/DirtyHttpCM scnm null getter'] +
+                         [GAME_PATCH_KEYS[k] for k in ('patch_60fps',) if k in GAME_PATCH_KEYS])
 
     def test_every_bundled_patch_is_signed_and_found_at_its_address(self):
         # The signatures must match at their published addresses in the firmware 5.05 build
