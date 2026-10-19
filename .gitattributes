@@ -2,3 +2,4 @@
 # checkout makes `set -o pipefail` fail as `pipefail\r`.
 *.sh text eol=lf
 *.bash text eol=lf
+*.patch text eol=lf
