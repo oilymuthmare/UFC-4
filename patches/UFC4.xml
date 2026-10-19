@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- DirtyHttpCM scnm getter: do not dereference a NULL singleton.
+     CUSA14209 28.00 (guest 0x137cdd0). Both callers pass 'scnm'. If the object
+     was never created, return 10 (the value create_scnm stores at +0x18). -->
+<Patch>
+    <TitleID>
+        <ID>CUSA14209</ID>
+        <ID>CUSA14204</ID>
+    </TitleID>
+    <Metadata Title="EA SPORTS UFC 4"
+              Name="DirtyHttpCM scnm null getter"
+              Note="Bring-up: SimThread read of [scnm+0x18] when DirtyHttpCM create did not run or its alloc failed. Returns 10 if the singleton is NULL."
+              Author="ufc4-native"
+              PatchVer="0.1"
+              AppVer="28.00"
+              AppElf="eboot.bin"
+              isEnabled="true">
+        <PatchList>
+            <Line Type="bytes" Address="0x537cdd0"
+                  Value="48 8B 05 9C 76 9E 01 48 85 C0 74 04 8B 40 18 C3 B8 0A 00 00 00 C3"
+                  Signature="B8 FF FF FF FF 81 FF 73 63 6E 6D 75 0A 48 8B 05 9C 76 9E 01 8B 40 18 C3"/>
+        </PatchList>
+    </Metadata>
+</Patch>

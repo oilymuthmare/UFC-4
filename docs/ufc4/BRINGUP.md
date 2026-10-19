@@ -74,13 +74,28 @@ Guest fault: read access to 0000000000000018 at guest offset 0x137cde4 (SimThrea
 rax=0 rdi=0x6d6e6373 (the ASCII bytes "scnm")   exit code 3
 ```
 
-A null pointer was read at offset `0x18` right after `NetLib` and `SocketRecv` were created. Which
-lookup returned null is not known yet. Use `tools/re/fault_context.py out/eboot.elf <log>` to see the
-function and the instructions around `0x137cde4` and each backtrace address, then decide whether the
-null comes from a runtime call that returned an error (a stub that should have returned data) or from a
-file the game expected. The `open(...) -> not found` lines before the crash (`cps.lreq`,
-`tableutil.lreq`, `ctloverride.xml`, `settings.cfg`, `*_versioninfo.ini`) are candidates but are not
-shown to be the cause.
+Decoded from `out/eboot.elf` (Ant cloud dump, 2026-10-19). The faulting function is a fourcc
+getter at `0x137cdd0`:
+
+```
+mov eax, -1
+cmp edi, 'scnm'          ; rdi was 0x6d6e6373
+jne return
+mov rax, [0x2d64480]     ; global singleton, was NULL
+mov eax, [rax+0x18]      ; fault
+ret
+```
+
+`scnm` is EA DirtySDK **DirtyHttpCM** (`0x201d1d1`), used with `protohttpps4`. The boot path at
+`0xc136d0` calls DirtyHttpCM init (`0x13256b0`) and then the getter **with no check of the
+return**. Init can skip `create_scnm` and still return 0 when the factory at `0x137ba00` returns
+**-9** (wrapper already present). Factory/create both allocate through `0x2b23d0` with tags
+`ncon` / `mchd`. Command-line needles in the instance name: `-checktick`, `-delaySEMD`,
+`-nptoolkit`, `-noupnp`.
+
+Bring-up patch `patches/UFC4.xml` (on by default): if the singleton is NULL the getter returns
+**10** (the value create would have written at `+0x18`) instead of faulting. That is not a real
+HTTP stack; it is only to get past this SimThread crash.
 
 ## 3. First picture
 

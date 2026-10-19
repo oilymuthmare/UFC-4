@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['src/**', 'gpu/**', 'scripts/**', 'cmake/**', 'packaging/windows/**', '.github/workflows/windows-cross.yml']
+    paths: ['src/**', 'gpu/**', 'scripts/**', 'cmake/**', 'packaging/windows/**', 'patches/**', '.github/workflows/windows-cross.yml']
 
 jobs:
   cross-build:
