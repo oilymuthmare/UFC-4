@@ -62,6 +62,26 @@ the game's entry point.
    variants, `sceNpUniversalDataSystem`, `sceGameLiveStreaming`, more `sceSaveData*`. Stub the
    ones that only report status.
 
+### Result of the first real run (2026-10-19, Windows, GTX 1660 SUPER, CUSA14209 28.00)
+
+Steps 1 and 2 passed on a real dump: `prepare.py` read the plaintext `eboot.bin` (691 imports, 44
+required modules), `link_libc.py` and `link_modules.py` linked `libc.prx` and `libSceFios2.prx`
+(134 native bindings, 647 imports left to the host runtime, 645 of them named), the game started, mounted its
+`.big` archives, created its job and render threads, and opened the pad. It then stopped:
+
+```
+Guest fault: read access to 0000000000000018 at guest offset 0x137cde4 (SimThread)
+rax=0 rdi=0x6d6e6373 (the ASCII bytes "scnm")   exit code 3
+```
+
+A null pointer was read at offset `0x18` right after `NetLib` and `SocketRecv` were created. Which
+lookup returned null is not known yet. Use `tools/re/fault_context.py out/eboot.elf <log>` to see the
+function and the instructions around `0x137cde4` and each backtrace address, then decide whether the
+null comes from a runtime call that returned an error (a stub that should have returned data) or from a
+file the game expected. The `open(...) -> not found` lines before the crash (`cps.lreq`,
+`tableutil.lreq`, `ctloverride.xml`, `settings.cfg`, `*_versioninfo.ini`) are candidates but are not
+shown to be the cause.
+
 ## 3. First picture
 
 Done when: the EA logo or the title menu renders and responds to the pad.
